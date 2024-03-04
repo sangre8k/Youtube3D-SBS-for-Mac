@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <title>Youtube 3D SBS Video Example</title>
+    <style>
+        .video-container {
+            overflow: hidden; /* 클립된 영역 밖의 부분을 숨김 */
+            width: 3120px; /* 컨테이너의 너비 조정 */
+            height: 1080px; /* 컨테이너의 높이 조정 */
+            position: relative; /* iframe 위치 조정을 위한 기준점 */
+        }
+        .video-part {
+            position: absolute;
+            top: 00px;
+            left: 0;
+            width: 100%; /* iframe의 너비를 컨테이너에 맞춤 */
+            height: 100%; /* iframe의 높이를 컨테이너에 맞춤 */
+            z-index: -999;
+        }
+        .video-part iframe {
+            width: 3120px;
+            height: 1080px;
+            transform: translateX(-1200px) scale(2, 1); /* X 축으로 -600px 이동 후, 가로 크기를 두 배로 확대 */
+            transform-origin: 0 0; /* 변환의 기준점을 왼쪽 상단으로 설정 */
+        }
+         /* 전체 화면 버튼 스타일 */
+        #fullscreenButton {
+            position: relative; /* 확실한 위치 지정 */
+            z-index: 10; /* 영상 위에 버튼이 오도록 z-index 설정 */
+        }
+
+        #ui-layer {
+            position: fixed; /* 뷰포트에 상대적으로 위치 */
+            top: 50%; /* 상단에서 50% 위치 */
+            left: 50%; /* 왼쪽에서 50% 위치 */
+            transform: translate(-50%, -50%); /* 정확한 중앙 정렬을 위해 자신의 크기의 반만큼 이동 */
+            z-index: 1000; /* 확실히 최상위에 위치하도록 z-index 설정 */
+            background: rgba(255, 255, 255, 0.7); /* 배경색 추가 (선택적) */
+            padding: 20px; /* 안쪽 여백 추가 (선택적) */
+            border-radius: 10px; /* 모서리 둥글게 (선택적) */
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    function loadVideo() {
+        var urlInput = document.getElementById("videoUrl").value;
+        // YouTube URL 형식을 검사하는 정규 표현식
+        var youtubeUrlPattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+(&[\w-]+)*$/;
+
+        // 입력값 검사
+        if (!urlInput.trim() || !youtubeUrlPattern.test(urlInput)) {
+            // 에러 메시지 표시
+            alert("유효한 YouTube 영상 주소를 입력해주세요.");
+            return; // 함수 실행을 여기서 중단
+        }
+
+        var iframe = document.getElementById("videoFrame"); // iframe을 id로 찾습니다.
+
+        // YouTube URL에서 video ID 추출
+        var videoId = urlInput.split('v=')[1];
+        var ampersandPosition = videoId.indexOf('&');
+        if (ampersandPosition != -1) {
+            videoId = videoId.substring(0, ampersandPosition);
+        }
+
+        // iframe의 src 속성을 업데이트하여 비디오 로드
+        iframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1&rel=0&playbackquality=highres";
+        gofullScreen();
+    }
+
+
+    function gofullScreen()
+    {
+                // 전체 화면 모드를 지원하는지 확인
+        if (document.documentElement.requestFullscreen) {
+            // 전체 화면 모드로 전환
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) { /* Firefox */
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
+            document.documentElement.msRequestFullscreen();
+        }
+        var layer = document.getElementById('ui-layer');
+        layer.style.display = "none";
+    }
+
+    // 페이지 로드가 완료되면 함수를 실행
+    window.onload = function() {
+        // 버튼 요소를 찾음
+        var fullscreenButton = document.getElementById("fullscreenButton");
+
+        // 버튼 클릭 이벤트 리스너 추가
+        fullscreenButton.addEventListener("click", function() {
+            gofullScreen();
+        });
+
+        document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") { // ESC 키를 눌렀는지 확인
+            // 특정 레이어의 ID가 'myLayer'라고 가정
+            var layer = document.getElementById('ui-layer');
+            layer.style.display = 'block'; // 레이어를 다시 보이게 설정
+        }
+    });
+
+};
+</script>
+<div id="ui-layer">
+<input style=" z-index: 10;" type="text" id="videoUrl" placeholder="YouTube URL 입력"/>
+<button style=" z-index: 10;" onclick="loadVideo()">비디오 로드</button>
+<button style=" z-index: 10;" id="fullscreenButton">전체 화면</button>
+</div>
+    <table style="border: 10px; width :3120px; overflow: hidden; ">
+
+    <tr>
+        <td>
+            <div class="video-part left-part" style="border: 10px; width :3840px; overflow: hidden; " >
+                <iframe id="videoFrame" style="width: 3120px; height: 1080px; overflow: hidden; " src="" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
